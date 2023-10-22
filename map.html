@@ -1,0 +1,657 @@
+<!-- Temperature -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Map</title>
+
+    <!-- Include OpenLayers library -->
+    <script src="https://cdn.jsdelivr.net/npm/ol@v8.1.0/dist/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.1.0/ol.css">
+
+    <style>
+        /* Define the map container to occupy the full viewport */
+        body, html {
+            height: 100%;
+            margin: 0;
+            scroll-behavior: none;
+            overflow: hidden;
+        }
+
+        /* Make the map container fullscreen */
+        #map {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            
+        }
+
+        /* Style the search bar */
+        #searchBar {
+            text-align: center;
+            margin: 10px;
+            position: absolute;
+            top: 10px; /* Adjust this value to control vertical positioning */
+            left: 500px; /* Adjust this value to control horizontal positioning */
+            z-index: 1000; /* Make sure it's above other elements */
+            width: 500px;
+        }
+
+        #locationInput {
+            border: none;
+    outline: none;
+    padding: 0.4em 1em;
+    border-radius: 24px;
+    background: white;
+    color: rgb(0, 0, 0);
+    font-family: inherit;
+    font-size: 105%;
+    width: calc(100% - 100px); /* Adjust as needed */
+    height: 30px;
+        }
+
+        #searchButton {
+            margin: 0.5em;
+            border-radius: 50%;
+            border: none;
+            height: 46px;
+            width: 44px;
+            outline: none;
+            background: white;
+            cursor: pointer;
+            transition: 0.2s ease-in-out;
+        }
+
+        #searchButton:hover {
+            background-color: #f0f0f0;
+        }
+        #searchButton {
+            margin-left: 5px; /* Add margin to separate from the input field */
+        }
+        /* Style for the marker */
+        .marker {
+        width: 20px;
+        height: 20px;
+        background-color: #007BFF;
+        border-radius: 50%;
+        }
+
+        /* Style for the overlay container */
+        .overlay {
+        position: absolute;
+        z-index: 10;
+        pointer-events: none;
+        }
+
+        /* Style for the popup text (you can customize this) */
+        .popup {
+        background-color: #fff;
+        padding: 5px;
+        border-radius: 5px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        }
+        .map-container {
+        position: relative;
+        }
+
+.clouds {
+    position: absolute;
+    bottom: 35px;
+    left: 150px;
+    z-index: 100;
+    pointer-events: auto;
+    width: 50px;
+    height: 50px;
+    background-image: url('Clouds.png'); /* Set the path to your image */
+    background-size: cover; /* Adjust to fit your design */
+    background-repeat: no-repeat; /* Prevent repeating */
+    background-position: center; /* Center the background image */
+    border-radius: 10px;
+}
+
+.clouds a {
+    display: inline-block;
+    background-color: #007bff00;
+    color: #ffffff00;
+    padding: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    text-align: center;
+    line-height: 1.5;
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+}
+
+.clouds a:hover {
+    background-color: #ffffff84;
+    color: black;
+}
+.clouds p{
+    position: relative;
+    bottom: 10px;
+    text-align: center;
+    font-size: 14px;
+    font: bold;
+
+}
+.preci {
+    position: absolute;
+    bottom: 35px;
+    left: 230px;
+    z-index: 100;
+    pointer-events: auto;
+    width: 50px;
+    height: 50px;
+    background-image: url('precipitation.png'); /* Set the path to your image */
+    background-size: cover; /* Adjust to fit your design */
+    background-repeat: no-repeat; /* Prevent repeating */
+    background-position: center; /* Center the background image */
+    border-radius: 10px;
+}
+
+.preci a {
+    display: inline-block;
+    background-color: #007bff00;
+    color: #ffffff00;
+    padding: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    text-align: center;
+    line-height: 1.5;
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+}
+
+.preci a:hover {
+    background-color: #ffffff84;
+    color: black;
+}
+.preci p{
+    position: relative;
+    bottom: 10px;
+    font-size: 14px;
+    text-align: center;
+}
+.wind {
+    position: absolute;
+    bottom: 35px;
+    left: 310px;
+    z-index: 100;
+    pointer-events: auto;
+    width: 50px;
+    height: 50px;
+    background-image: url('windspeed.png'); /* Set the path to your image */
+    background-size: cover; /* Adjust to fit your design */
+    background-repeat: no-repeat; /* Prevent repeating */
+    background-position: center; /* Center the background image */
+    border-radius: 10px;
+}
+
+.wind a {
+    display: inline-block;
+    background-color: #007bff00;
+    color: #ffffff00;
+    padding: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    text-align: center;
+    line-height: 1.5;
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    
+}
+
+.wind a:hover {
+    background-color: #ffffff84;
+    color: black;
+}
+.wind p{
+    position: relative;
+    bottom: 10px;
+    font-size: 14px;
+    text-align: center;
+}
+.pressure {
+    position: absolute;
+    bottom: 35px;
+    left: 390px;
+    z-index: 100;
+    pointer-events: auto;
+    width: 50px;
+    height: 50px;
+    background-image: url('Pressure.png'); /* Set the path to your image */
+    background-size: cover; /* Adjust to fit your design */
+    background-repeat: no-repeat; /* Prevent repeating */
+    background-position: center; /* Center the background image */
+    border-radius: 10px;
+}
+
+.pressure a {
+    display: inline-block;
+    background-color: #007bff00;
+    color: #ffffff00;
+    padding: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    text-align: center;
+    line-height: 1.5;
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+}
+
+.pressure a:hover {
+    background-color: #ffffff84;
+    color: black;
+}
+.pressure p{
+    position: relative;
+    bottom: 10px;
+    font-size: 14px;
+    text-align: center;
+}
+.temp {
+    position: absolute;
+    bottom: 35px;
+    left: 470px;
+    z-index: 100;
+    pointer-events: auto;
+    width: 50px;
+    height: 50px;
+    background-image: url('Temperature.png'); /* Set the path to your image */
+    background-size: cover; /* Adjust to fit your design */
+    background-repeat: no-repeat; /* Prevent repeating */
+    background-position: center; /* Center the background image */
+    border-radius: 10px;
+}
+
+.temp a {
+    display: inline-block;
+    background-color: #007bff00;
+    color: #ffffff00;
+    padding: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    text-align: center;
+    line-height: 1.5;
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    border: 2px solid #0202ff;
+}
+
+.temp a:hover {
+    background-color: #ffffff84;
+    color: black;
+}
+.temp p{
+    position: relative;
+    bottom: 14px;
+    right: 10px;
+    font-size: 14px;
+    text-align: center;
+}
+#maps-container {
+    display: none;
+    position: absolute;
+    bottom: 231px;
+    left: -74px;
+}
+.layer{
+    text-align: center;
+    margin: 10px;
+    position: absolute;
+    top: 306px;
+    left: -6px;
+    z-index: 1000;
+}
+#layer-button{
+    width: 35px;
+    height: 35px;
+}
+.bg{
+    position: absolute;
+    bottom: 2px;
+    left: 125px;
+    width: 410px;
+    height: 80px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 15px;
+    z-index: 10;
+    padding: 10px;
+}
+.ol-attribution ul {
+    margin: 0;
+    padding: 1px .5em;
+    color: var(--ol-foreground-color);
+    text-shadow: 0 0 2px var(--ol-background-color);
+    font-size: 0px;
+}
+  /* CSS for legend container */
+  .legend-container {
+            background-color: rgba(255, 255, 255, 0);
+            border: 1px solid #cccccc00;
+            padding: 10px;
+            border-radius: 5px;
+            position: absolute;
+            top: 550px;
+            right: 10px;
+            width: 250px;
+            z-index: 100;
+        }
+
+        /* CSS for gradient line */
+        .horizontal-gradient-line {
+            width: 100%;
+            height: 10px;
+            background-image: linear-gradient(to right, rgb(159, 85, 181) 0%, rgb(44, 106, 187) 8.75%, rgb(82, 139, 213) 12.5%, rgb(103, 163, 222) 18.75%, rgb(142, 202, 240) 25%, rgb(155, 213, 244) 31.25%, rgb(172, 225, 253) 37.5%, rgb(194, 234, 255) 43.75%, rgb(255, 255, 208) 50%, rgb(254, 248, 174) 56.25%, rgb(254, 232, 146) 62.5%, rgb(254, 226, 112) 68.75%, rgb(253, 212, 97) 75%, rgb(244, 168, 94) 82.5%, rgb(244, 129, 89) 87.5%, rgb(244, 104, 89) 93.75%, rgb(244, 76, 73) 100%);
+            border-radius: 10px;
+        }
+
+
+        /* CSS for scale dividers */
+        .scale-dividers {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+        ul#suggestions {
+            position: absolute;
+    top: 60px;
+    width: 446px;
+    background: white;
+    left: 511px;
+    z-index: 100;
+    border-radius: 10px;
+}
+
+    </style>
+</head>
+<body>
+
+    <!-- Create a search bar -->
+    <div id="searchBar">
+        <input type="text" id="locationInput" placeholder="Enter a location">
+        <button id="searchButton"> <!-- Button element for triggering the search -->
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg"> <!-- SVG icon within the button -->
+                <path d="M909.6 854.5L649.9 594.8C690.2 542.7 712 479 712 412c0-80.2-31.3-155.4-87.9-212.1-56.6-56.7-132-87.9-212.1-87.9s-155.5 31.3-212.1 87.9C143.2 256.5 112 331.8 112 412c0 80.1 31.3 155.5 87.9 212.1C256.5 680.8 331.8 712 412 712c67 0 130.6-21.8 182.7-62l259.7 259.6a8.2 8.2 0 0 0 11.6 0l43.6-43.5a8.2 8.2 0 0 0 0-11.6zM570.4 570.4C528 612.7 471.8 636 412 636s-116-23.3-158.4-65.6C211.3 528 188 471.8 188 412s23.3-116.1 65.6-158.4C296 211.3 352.2 188 412 188s116.1 23.2 158.4 65.6S636 352.2 636 412s-23.3 116.1-65.6 158.4z"></path>
+            </svg>
+        </button>
+    </div>
+    <ul id="suggestions"></ul>
+    <div class="legend-container" id="legend">
+        <div class="horizontal-gradient-line"></div>
+        <div class="scale-dividers">
+            <div>-40</div>
+            <div>-20</div>
+            <div>0</div>
+            <div>20</div>
+            <div>40</div>
+        </div>
+    </div>
+    <div id="overlay" class="overlay">
+        <div class="marker"></div>
+        <div class="popup">
+            Temperature: <span id="temperature">N/A</span>
+        </div>
+    </div>
+    <div class="layer-section">
+    <img class="layer" id="layer-button" src="https://cdn-icons-png.flaticon.com/128/1014/1014362.png" alt="Layer Icon">
+    </div>
+    <div class="maps" id="maps-container">
+        <div class="bg"></div>
+        <div class="clouds">
+            <a href="map2.html"></a>
+            <p><b>Clouds</b></p>
+        </div>
+        <div class="preci">
+            <a href="map3.html"></a>
+            <p><b>Rain</b></p>
+        </div>
+        <div class="wind">
+            <a href="map4.html"></a>
+            <p><b>Wind</b></p>
+        </div>
+        <div class="pressure">
+            <a href="map5.html"></a>
+            <p><b>Pressure</b></p>
+        </div>
+        <div class="temp">
+            <a href="#"></a>
+            <p><b>Temperature</b></p>
+        </div>
+    </div>
+    <!-- Create a map container -->
+    <div id="map" class="map"></div>
+
+    <script>
+        // Your OpenWeatherMap API key
+        var apiKey = '11af4d539c4a1c02758024a29171351f';
+
+        // Initialize the map with a default location and zoom level
+        var map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                center: ol.proj.fromLonLat([0, 0]),
+                zoom: 2
+            })
+        });
+
+        // Add the OpenWeatherMap "temp_new" layer
+        var tempLayer = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`,
+                attributions: '© <a href="https://openweathermap.org">OpenWeatherMap</a> contributors'
+            })
+        });
+        var overlay = new ol.Overlay({
+        element: document.getElementById('overlay'),
+        positioning: 'bottom-center',
+        offset: [0, -10], // Offset to adjust the marker's position
+});
+
+        map.addLayer(tempLayer);
+
+        // Add map controls
+        map.addControl(new ol.control.ZoomSlider());
+        map.addControl(new ol.control.ScaleLine());
+        map.addControl(new ol.control.FullScreen());
+
+        // Function to perform location search and update the map
+        function performLocationSearch() {
+            resetMapView();
+            var locationInput = document.getElementById('locationInput').value;
+
+            // Encode the user input to ensure it's safe for a URL
+            var encodedLocationInput = encodeURIComponent(locationInput);
+
+            // Use Nominatim to geocode the location
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedLocationInput}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Extract the first result (assuming it's the most relevant)
+                        var result = data[0];
+
+                        // Extract coordinates correctly
+                        var latitude = parseFloat(result.lat);
+                        var longitude = parseFloat(result.lon);
+
+                        // Debugging: Print the result and coordinates to the console
+                        console.log('Search Result:', result);
+                        console.log('Latitude:', latitude);
+                        console.log('Longitude:', longitude);
+
+
+                        setOverlayPosition(latitude, longitude);
+
+                        // Smoothly animate to the searched location on the map
+                        map.getView().animate({
+                            center: ol.proj.fromLonLat([longitude, latitude]),
+                            zoom: 12,
+                            duration: 1000 // Animation duration in milliseconds
+                        });
+                    } else {
+                        // Handle the case when no results are found
+                        alert('Location not found.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error searching for location:', error);
+                });
+        }
+
+        // Event handler for the search button
+        document.getElementById('searchButton').addEventListener('click', performLocationSearch);
+
+        // Event handler for pressing Enter in the input field
+        document.getElementById('locationInput').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                performLocationSearch();
+            }
+        });
+    function resetMapView() {
+    map.getView().animate({
+        center: ol.proj.fromLonLat([0, 0]),
+        zoom: 2,
+        duration: 1000 // Animation duration in milliseconds
+    });
+}
+
+map.addOverlay(overlay);
+function setOverlayPosition(latitude, longitude) {
+    overlay.setPosition(ol.proj.fromLonLat([longitude, latitude]));
+}
+
+// Autocomplete code
+const autocompleteInputField = document.getElementById('locationInput');
+const suggestionsList = document.getElementById('suggestions');
+
+autocompleteInputField.addEventListener('input', function () {
+    const query = autocompleteInputField.value;
+
+    // Construct the Nominatim API URL
+    const apiUrl = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=5`;
+
+    // Make the API request
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            // Log the API response in the console
+            console.log('API Response:', data);
+
+            // Clear previous suggestions
+            suggestionsList.innerHTML = '';
+
+            // Display matching locations
+            data.forEach(item => {
+                const locationName = item.display_name;
+                const listItem = document.createElement('li');
+
+                // Extract and display the city name from the address
+                let city = '';
+                if (item.address) {
+                    if (item.address.city) {
+                        city = item.address.city;
+                    } else if (item.address.town) {
+                        city = item.address.town;
+                    } else if (item.address.village) {
+                        city = item.address.village;
+                    } else if (item.address.hamlet) {
+                        city = item.address.hamlet;
+                    } else if (item.address.suburb) {
+                        city = item.address.suburb;
+                    }
+                }
+
+                // Use the full location name if the city is empty
+                listItem.textContent = city || locationName;
+
+                // Add click event listener to make suggestions selectable
+                listItem.addEventListener('click', function () {
+                    autocompleteInputField.value = city || locationName;
+                    suggestionsList.innerHTML = ''; // Clear suggestions
+                });
+
+                suggestionsList.appendChild(listItem);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching data from Nominatim:', error);
+        });
+});
+// Get references to the button and the maps container
+const layerButton = document.getElementById('layer-button');
+const mapsContainer = document.getElementById('maps-container');
+
+// Add a click event listener to the button
+layerButton.addEventListener('click', function() {
+    // Toggle the visibility of the maps container
+    if (mapsContainer.style.display === 'none' || mapsContainer.style.display === '') {
+        mapsContainer.style.display = 'block';
+    } else {
+        mapsContainer.style.display = 'none';
+    }
+});
+
+
+
+// Function to fetch and display the temperature
+function fetchAndDisplayTemperature(location) {
+    // Your OpenWeatherMap API Key
+    const apiKey = '11af4d539c4a1c02758024a29171351f';
+
+    // Construct the API URL for the location
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric`;
+
+    // Make the API request
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            // Check if the API response contains the temperature data
+            if (data.main && data.main.temp) {
+                // Extract the temperature from the API response
+                const temperature = data.main.temp;
+
+                // Display the temperature in the popup
+                const temperatureElement = document.getElementById('temperature');
+                temperatureElement.textContent = `${temperature}°C`;
+
+                // Show the updated popup
+                document.getElementById('overlay').style.display = 'block';
+            } else {
+                console.error('Temperature data not found in API response');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching weather data:', error);
+        });
+}
+
+// Event handler for the search button
+document.getElementById('searchButton').addEventListener('click', function() {
+    const locationInput = document.getElementById('locationInput');
+    const location = locationInput.value;
+
+    if (location) {
+        fetchAndDisplayTemperature(location);
+    }
+});
+
+
+
+
+    </script>
+</body>
+</html>
